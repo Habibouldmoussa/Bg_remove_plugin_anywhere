@@ -1,5 +1,5 @@
-import * as bodyPix from '@tensorflow-models/body-pix'
-import { hex2rgba } from '../utils'
+const bodyPix = require('@tensorflow-models/body-pix');
+const hex2rgba = require('../../utils');
 
 const defaultBodyPixConfig = {
   flipHorizontal: false,
@@ -8,12 +8,14 @@ const defaultBodyPixConfig = {
   backgroundColour: '#ffffff'
 }
 
-export default class BackgroundRemoval {
-  constructor () {
+
+module.exports = class BackgroundRemoval {
+  constructor() {
     this.model = null
   }
 
-  async remove (imgData, newConfig = {}) {
+  async remove(imgData, newConfig = {}) {
+    console.log(imgData);
     const { width, height } = imgData
     const config = { ...defaultBodyPixConfig, ...newConfig }
 
@@ -22,12 +24,12 @@ export default class BackgroundRemoval {
     const predictedImgData = await this._predict(imgData, config)
     const rawImageData = await this._intersectPixels(imgData, predictedImgData, config.backgroundColour)
 
-    const canvas = document.createElement('canvas')
+    const canvas = createCanvas(width, height)
+
     canvas.setAttribute('width', width)
     canvas.setAttribute('height', height)
 
     const ctx = canvas.getContext('2d')
-
     const imageData = ctx.createImageData(width, height)
     for (let i = 0; i < imageData.data.length; i++) {
       imageData.data[i] = rawImageData.data[i]
@@ -38,7 +40,7 @@ export default class BackgroundRemoval {
     return canvas.toDataURL()
   }
 
-  async loadModel () {
+  async loadModel() {
     if (this.model) {
       return this.model
     }
@@ -48,13 +50,13 @@ export default class BackgroundRemoval {
     return this.model
   }
 
-  async _predict (imgData, config = {}) {
+  async _predict(imgData, config = {}) {
     await this.loadModel()
 
     return this.model.segmentPerson(imgData, config)
   }
 
-  async _intersectPixels (imgData, predictedImgData, backgroundColour = '#ffffff') {
+  async _intersectPixels(imgData, predictedImgData, backgroundColour = '#ffffff') {
     const { width, height } = imgData
     const [r, g, b, a] = hex2rgba(backgroundColour)
 
@@ -75,5 +77,8 @@ export default class BackgroundRemoval {
     }
 
     return newImageData
+  }
+  async test() {
+    console.log('test')
   }
 }

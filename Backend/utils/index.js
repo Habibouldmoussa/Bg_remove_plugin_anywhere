@@ -1,6 +1,6 @@
 /* istanbul ignore file */
-
-export function hex2rgba (hex) {
+const { createCanvas, loadImage } = require('canvas');
+exports.hex2rgba = (hex) => {
   hex = hex.replace('#', '')
 
   const r = parseInt(hex.slice(0, 2), 16)
@@ -15,28 +15,29 @@ export function hex2rgba (hex) {
   ]
 }
 
-export function getImageDataFromImg (imgElem) {
-  const { width, height } = imgElem
+exports.getImageDataFromImg = (imgElem) => {
+  loadImage(imgElem).then((image) => {
+    const { width, height } = image
+    const canvas = createCanvas(width, height)
+    const context = canvas.getContext('2d')
+    context.drawImage(image, 0, 0)
 
-  const canvas = document.createElement('canvas')
-  const context = canvas.getContext('2d')
+    return context.getImageData(0, 0, width, height)
 
-  canvas.width = width
-  canvas.height = height
+  })
 
-  context.drawImage(imgElem, 0, 0)
 
-  return context.getImageData(0, 0, width, height)
+
 }
 
-export function loadImage (fileBlob) {
+exports.loadImage = (fileBlob) => {
   const imgElem = new Image()
   imgElem.src = fileBlob
 
   return onImageLoaded(imgElem)
 }
 
-export function onImageLoaded (imgElem) {
+exports.onImageLoaded = (imgElem) => {
   return new Promise((resolve, reject) => {
     imgElem.addEventListener('load', () => {
       resolve(imgElem)
@@ -48,7 +49,7 @@ export function onImageLoaded (imgElem) {
   })
 }
 
-export function suggestedDownloadFilename (filename) {
+exports.suggestedDownloadFilename = (filename) => {
   const extIndex = filename.split('/').pop().lastIndexOf('.')
   const postfix = '--with-background.png'
 
